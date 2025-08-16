@@ -1,0 +1,220 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { ShoppingBag, Menu, X, Search, User } from "lucide-react"
+import { useState, useEffect } from "react"
+import { cn } from "@/lib/utils"
+import { Button } from "./ui/button"
+import { Cart } from "./cart"
+
+const navItems = [
+  { name: "Home", href: "/" },
+  { name: "Collection", href: "/collection" },
+  { name: "Furniture", href: "/furniture" },
+  { name: "Lighting", href: "/lighting" },
+  { name: "Accessories", href: "/accessories" },
+  { name: "Lookbook", href: "/lookbook" },
+  { name: "About", href: "/about" },
+]
+
+export function Navbar() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [cartOpen, setCartOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const pathname = usePathname()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  useEffect(() => {
+    // Close mobile menu when route changes
+    setIsOpen(false)
+  }, [pathname])
+
+  return (
+    <>
+      {/* Top Announcement Bar */}
+      <div className="bg-black text-white text-sm text-center py-2 px-4">
+        <p>Free shipping on all orders over $500 | Use code: <span className="font-medium">LUXE15</span> for 15% off your first order</p>
+      </div>
+      
+      <header className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
+        scrolled ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+      )}>
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden text-gray-700 hover:bg-transparent hover:text-gray-900 -ml-2"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+
+            {/* Logo */}
+            <Link 
+              href="/" 
+              className="text-2xl font-serif font-light tracking-wider mx-auto md:mx-0 md:mr-12 transition-opacity hover:opacity-80"
+            >
+              LUXE<span className="text-gold">HABITAT</span>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "text-xs uppercase tracking-widest transition-all duration-300 hover:text-gold relative group",
+                    pathname === item.href ? "text-gold" : "text-gray-700"
+                  )}
+                >
+                  {item.name}
+                  <span className={cn(
+                    "absolute -bottom-1 left-0 w-0 h-px bg-gold transition-all duration-300 group-hover:w-full",
+                    pathname === item.href ? "w-full" : ""
+                  )}></span>
+                </Link>
+              ))}
+            </nav>
+
+            <div className="flex items-center space-x-2">
+              {/* Search */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-700 hover:bg-transparent hover:text-gold transition-colors"
+                  onClick={() => setSearchOpen(!searchOpen)}
+                >
+                  <Search className="h-5 w-5" />
+                  <span className="sr-only">Search</span>
+                </Button>
+                
+                {searchOpen && (
+                  <div className="absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-md overflow-hidden z-50">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search our collection..."
+                        className="w-full py-3 pl-4 pr-10 text-sm border-b focus:outline-none"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        autoFocus
+                      />
+                      <button 
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        onClick={() => setSearchOpen(false)}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Account */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-700 hover:bg-transparent hover:text-gold transition-colors hidden md:inline-flex"
+                asChild
+              >
+                <Link href="/account">
+                  <User className="h-5 w-5" />
+                  <span className="sr-only">Account</span>
+                </Link>
+              </Button>
+
+              {/* Cart */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-700 hover:bg-transparent hover:text-gold transition-colors relative"
+                onClick={() => setCartOpen(true)}
+              >
+                <ShoppingBag className="h-5 w-5" />
+                <span className="sr-only">Cart</span>
+                <span className="absolute -top-1 -right-1 bg-gold text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">0</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className={cn(
+            "md:hidden bg-white transition-all duration-300 ease-in-out overflow-hidden border-t border-gray-100 mt-4",
+            isOpen ? "max-h-screen py-6" : "max-h-0"
+          )}>
+            <div className="flex flex-col space-y-6 pt-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full py-3 px-4 text-sm border rounded-sm focus:outline-none focus:ring-1 focus:ring-gold"
+                />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "py-2 text-sm uppercase tracking-wider transition-colors text-center",
+                      pathname === item.href
+                        ? "text-gold border-b border-gold"
+                        : "text-gray-700 hover:text-gold"
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                <Link
+                  href="/account"
+                  className="py-2 text-sm uppercase tracking-wider text-gray-700 hover:text-gold transition-colors text-center"
+                >
+                  My Account
+                </Link>
+              </div>
+              
+              <div className="pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-2">CUSTOMER SERVICE</p>
+                <div className="space-y-2">
+                  <a href="#" className="block text-sm text-gray-700 hover:text-gold transition-colors">Contact Us</a>
+                  <a href="#" className="block text-sm text-gray-700 hover:text-gold transition-colors">Shipping & Returns</a>
+                  <a href="#" className="block text-sm text-gray-700 hover:text-gold transition-colors">FAQs</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Cart Sidebar */}
+      <Cart open={cartOpen} onOpenChange={setCartOpen} />
+      
+      {/* Overlay when mobile menu is open */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </>
+  )
+}
